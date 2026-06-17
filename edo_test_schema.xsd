@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:edo="urn:edo:test:document:v1"
+           targetNamespace="urn:edo:test:document:v1"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified"
+           version="1.0">
+
+    <!-- ============================================================ -->
+    <!-- Корневой элемент: электронный документ ЭДО                   -->
+    <!-- ============================================================ -->
+    <xs:element name="ElectronicDocument" type="edo:ElectronicDocumentType">
+        <xs:annotation>
+            <xs:documentation xml:lang="ru">
+                Корневой элемент электронного документооборота.
+                Используется для тестирования валидации структуры ЭДО.
+            </xs:documentation>
+        </xs:annotation>
+
+        <!-- Уникальность номеров позиций в табличной части -->
+        <xs:key name="LineItemKey">
+            <xs:selector xpath="edo:Body/edo:Items/edo:Item"/>
+            <xs:field xpath="@lineNumber"/>
+        </xs:key>
+
+        <!-- Ссылочная целостность: налог ссылается на позицию -->
+        <xs:keyref name="TaxItemRef" refer="edo:LineItemKey">
+            <xs:selector xpath="edo:Body/edo:Taxes/edo:TaxEntry"/>
+            <xs:field xpath="@itemRef"/>
+        </xs:keyref>
+
+        <!-- Уникальность ИНН среди контрагентов -->
+        <xs:unique name="UniqueParticipantInn">
+            <xs:selector xpath="edo:Participants/edo:Participant"/>
+            <xs:field xpath="edo:Inn"/>
+        </xs:unique>
+    </xs:element>
+
+    <!-- ============================================================ -->
+    <!-- Основной тип документа                                       -->
+    <!-- ============================================================ -->
+    <xs:complexType name="ElectronicDocumentType">
+        <xs:sequence>
+            <xs:element name="Header" type="edo:HeaderType"/>
+            <xs:element name="Participants" type="edo:ParticipantsType"/>
+            <xs:element name="Body" type="edo:BodyType"/>
+            <xs:element name="Signatures" type="edo:SignaturesType" minOccurs="0"/>
+            <xs:element name="Extensions" type="edo:ExtensionsType" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="id" type="edo:GuidType" use="required"/>
+        <xs:attribute name="version" type="edo:VersionType" use="required"/>
+        <xs:attribute name="schemaUri" type="xs:anyURI" use="optional"/>
+    </xs:complexType>
+
+    <!-- ============================================================ -->
+    <!-- Заголовок документа                                          -->
+    <!-- ============================================================ -->
+    <xs:complexType name="HeaderType">
+        <xs:sequence>
+            <xs:element name="DocumentNumber" type="edo:DocNumberType"/>
+            <xs:element name="DocumentDate" type="xs:date"/>
+            <xs:element name="DocumentType" type="edo:DocumentKindType"/>
+            <xs:element name="Currency" type="edo:CurrencyCodeType"/>
+            <xs:element name="CorrectionInfo" type="edo:CorrectionType" minOccurs="0"/>
+            <xs:element name="Notes" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="CorrectionType">
+        <xs:sequence>
+            <xs:element name="OriginalDocumentId" type="edo:GuidType"/>
+            <xs:element name="CorrectionNumber" type="xs:positiveInteger"/>
+            <xs:element name="Reason" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- ============================================================ -->
+    <!-- Участники документооборота                                   -->
+    <!-- ============================================================ -->
+    <xs:complexType name="ParticipantsType">
+        <xs:sequence>
+            <xs:element name="Participant" type="edo:ParticipantType" minOccurs="2" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ParticipantType">
+        <xs:sequence>
+            <xs:element name="Inn" type="edo:InnType"/>
+            <xs:element name="Kpp" type="edo:KppType" minOccurs="0"/>
+            <xs:choice>
+                <xs:element name="LegalEntity" type="edo:LegalEntityType"/>
+                <xs:element name="Individual" type="edo:IndividualType"/>
+                <xs:element name="ForeignEntity" type="edo:ForeignEntityType"/>
+            </xs:choice>
+            <xs:element name="Address" type="edo:AddressType"/>
+            <xs:element name="Contacts" type="edo:ContactsType" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="role" type="edo:ParticipantRoleType" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="LegalEntityType">
+        <xs:sequence>
+            <xs:element name="FullName" type="xs:string"/>
+            <xs:element name="ShortName" type="xs:string" minOccurs="0"/>
+            <xs:element name="Ogrn" type="edo:OgrnType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="IndividualType">
+        <xs:sequence>
+            <xs:element name="LastName" type="xs:string"/>
+            <xs:element name="FirstName" type="xs:string"/>
+            <xs:element name="MiddleName" type="xs:string" minOccurs="0"/>
+            <xs:element name="Ogrnip" type="edo:OgrnipType" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ForeignEntityType">
+        <xs:sequence>
+            <xs:element name="Name" type="xs:string"/>
+            <xs:element name="CountryCode" type="edo:CountryCodeType"/>
+            <xs:element name="TaxId" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="AddressType">
+        <xs:choice>
+            <xs:element name="RussianAddress" type="edo:RussianAddressType"/>
+            <xs:element name="ForeignAddress" type="xs:string"/>
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="RussianAddressType">
+        <xs:sequence>
+            <xs:element name="PostalCode" type="edo:PostalCodeType"/>
+            <xs:element name="RegionCode" type="edo:RegionCodeType"/>
+            <xs:element name="City" type="xs:string"/>
+            <xs:element name="Street" type="xs:string" minOccurs="0"/>
+            <xs:element name="Building" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ContactsType">
+        <xs:sequence>
+            <xs:element name="Phone" type="edo:PhoneType" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Email" type="edo:EmailType" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- ============================================================ -->
+    <!-- Тело документа: позиции, итоги, налоги                       -->
+    <!-- ============================================================ -->
+    <xs:complexType name="BodyType">
+        <xs:sequence>
+            <xs:element name="Items" type="edo:ItemsType"/>
+            <xs:element name="Totals" type="edo:TotalsType"/>
+            <xs:element name="Taxes" type="edo:TaxesType" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ItemsType">
+        <xs:sequence>
+            <xs:element name="Item" type="edo:ItemType" minOccurs="1" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ItemType">
+        <xs:sequence>
+            <xs:element name="Name" type="xs:string"/>
+            <xs:element name="UnitCode" type="edo:UnitCodeType"/>
+            <xs:element name="Quantity" type="edo:QuantityType"/>
+            <xs:element name="Price" type="edo:MoneyType"/>
+            <xs:element name="Amount" type="edo:MoneyType"/>
+            <xs:element name="VatRate" type="edo:VatRateType"/>
+            <xs:element name="VatAmount" type="edo:MoneyType" minOccurs="0"/>
+            <xs:element name="CustomsDeclaration" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="lineNumber" type="xs:positiveInteger" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="TotalsType">
+        <xs:sequence>
+            <xs:element name="TotalWithoutVat" type="edo:MoneyType"/>
+            <xs:element name="TotalVat" type="edo:MoneyType"/>
+            <xs:element name="TotalWithVat" type="edo:MoneyType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TaxesType">
+        <xs:sequence>
+            <xs:element name="TaxEntry" type="edo:TaxEntryType" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TaxEntryType">
+        <xs:sequence>
+            <xs:element name="Rate" type="edo:VatRateType"/>
+            <xs:element name="Base" type="edo:MoneyType"/>
+            <xs:element name="Amount" type="edo:MoneyType"/>
+        </xs:sequence>
+        <xs:attribute name="itemRef" type="xs:positiveInteger" use="required"/>
+    </xs:complexType>
+
+    <!-- ============================================================ -->
+    <!-- Подписи                                                      -->
+    <!-- ============================================================ -->
+    <xs:complexType name="SignaturesType">
+        <xs:sequence>
+            <xs:element name="Signature" type="edo:SignatureType" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="SignatureType">
+        <xs:sequence>
+            <xs:element name="SignerInn" type="edo:InnType"/>
+            <xs:element name="CertificateThumbprint" type="edo:HexThumbprintType"/>
+            <xs:element name="SignedAt" type="xs:dateTime"/>
+            <xs:element name="SignatureValue" type="xs:base64Binary"/>
+        </xs:sequence>
+        <xs:attribute name="algorithm" type="edo:SignAlgorithmType" use="required"/>
+    </xs:complexType>
+
+    <!-- ============================================================ -->
+    <!-- Расширения (произвольная структура)                          -->
+    <!-- ============================================================ -->
+    <xs:complexType name="ExtensionsType">
+        <xs:sequence>
+            <xs:any namespace="##other" processContents="lax"
+                    minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:anyAttribute namespace="##any" processContents="lax"/>
+    </xs:complexType>
+
+    <!-- ============================================================ -->
+    <!-- Простые типы с ограничениями                                 -->
+    <!-- ============================================================ -->
+    <xs:simpleType name="GuidType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="VersionType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="\d+\.\d+(\.\d+)?"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="DocNumberType">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+            <xs:maxLength value="50"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="DocumentKindType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="Invoice"/>
+            <xs:enumeration value="Act"/>
+            <xs:enumeration value="WaybillTorg12"/>
+            <xs:enumeration value="UniversalTransferDocument"/>
+            <xs:enumeration value="Contract"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="ParticipantRoleType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="Seller"/>
+            <xs:enumeration value="Buyer"/>
+            <xs:enumeration value="Carrier"/>
+            <xs:enumeration value="Agent"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="InnType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="\d{10}|\d{12}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="KppType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="\d{9}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="OgrnType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="\d{13}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="OgrnipType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="\d{15}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="PostalCodeType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="\d{6}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="RegionCodeType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="\d{2}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="CountryCodeType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[A-Z]{2}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="CurrencyCodeType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[A-Z]{3}"/>
+            <xs:length value="3"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="UnitCodeType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="\d{3}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="PhoneType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="\+?\d{1,3}[\d\s\-()]{5,20}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="EmailType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[^@\s]+@[^@\s]+\.[A-Za-z]{2,}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="MoneyType">
+        <xs:restriction base="xs:decimal">
+            <xs:fractionDigits value="2"/>
+            <xs:minInclusive value="0"/>
+            <xs:totalDigits value="18"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="QuantityType">
+        <xs:restriction base="xs:decimal">
+            <xs:fractionDigits value="3"/>
+            <xs:minExclusive value="0"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="VatRateType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="0"/>
+            <xs:enumeration value="10"/>
+            <xs:enumeration value="20"/>
+            <xs:enumeration value="WithoutVat"/>
+            <xs:enumeration value="10/110"/>
+            <xs:enumeration value="20/120"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="HexThumbprintType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9A-Fa-f]{40}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="SignAlgorithmType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="GOST R 34.10-2012 256"/>
+            <xs:enumeration value="GOST R 34.10-2012 512"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+</xs:schema>

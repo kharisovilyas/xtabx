@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edo:ElectronicDocument
+    xmlns:edo="urn:edo:test:document:v1"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    id="a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+    version="1.0"
+    schemaUri="urn:edo:test:document:v1">
+
+    <edo:Header>
+        <edo:DocumentNumber>ИНВ-2024/001</edo:DocumentNumber>
+        <edo:DocumentDate>2024-03-15</edo:DocumentDate>
+        <edo:DocumentType>Invoice</edo:DocumentType>
+        <edo:Currency>RUB</edo:Currency>
+        <edo:Notes>Счёт-фактура за март 2024</edo:Notes>
+        <edo:Notes>Дополнительное примечание</edo:Notes>
+    </edo:Header>
+
+    <edo:Participants>
+        <edo:Participant role="Seller">
+            <edo:Inn>7701234567</edo:Inn>
+            <edo:Kpp>770101001</edo:Kpp>
+            <edo:LegalEntity>
+                <edo:FullName>ООО «Ромашка»</edo:FullName>
+                <edo:ShortName>ООО Ромашка</edo:ShortName>
+                <edo:Ogrn>1234567890123</edo:Ogrn>
+            </edo:LegalEntity>
+            <edo:Address>
+                <edo:RussianAddress>
+                    <edo:PostalCode>115093</edo:PostalCode>
+                    <edo:RegionCode>77</edo:RegionCode>
+                    <edo:City>Москва</edo:City>
+                    <edo:Street>ул. Садовая</edo:Street>
+                    <edo:Building>д. 5, стр. 1</edo:Building>
+                </edo:RussianAddress>
+            </edo:Address>
+            <edo:Contacts>
+                <edo:Phone>+7 495 123-45-67</edo:Phone>
+                <edo:Email>info@romashka.ru</edo:Email>
+            </edo:Contacts>
+        </edo:Participant>
+
+        <edo:Participant role="Buyer">
+            <edo:Inn>501234567890</edo:Inn>
+            <edo:Individual>
+                <edo:LastName>Иванов</edo:LastName>
+                <edo:FirstName>Иван</edo:FirstName>
+                <edo:MiddleName>Иванович</edo:MiddleName>
+            </edo:Individual>
+            <edo:Address>
+                <edo:RussianAddress>
+                    <edo:PostalCode>190000</edo:PostalCode>
+                    <edo:RegionCode>78</edo:RegionCode>
+                    <edo:City>Санкт-Петербург</edo:City>
+                </edo:RussianAddress>
+            </edo:Address>
+        </edo:Participant>
+    </edo:Participants>
+
+    <edo:Body>
+        <edo:Items>
+            <edo:Item lineNumber="1">
+                <edo:Name>Компьютер настольный</edo:Name>
+                <edo:UnitCode>796</edo:UnitCode>
+                <edo:Quantity>2.000</edo:Quantity>
+                <edo:Price>50000.00</edo:Price>
+                <edo:Amount>100000.00</edo:Amount>
+                <edo:VatRate>20</edo:VatRate>
+                <edo:VatAmount>20000.00</edo:VatAmount>
+            </edo:Item>
+            <edo:Item lineNumber="2">
+                <edo:Name>Монитор 27"</edo:Name>
+                <edo:UnitCode>796</edo:UnitCode>
+                <edo:Quantity>2.000</edo:Quantity>
+                <edo:Price>25000.00</edo:Price>
+                <edo:Amount>50000.00</edo:Amount>
+                <edo:VatRate>20</edo:VatRate>
+                <edo:VatAmount>10000.00</edo:VatAmount>
+            </edo:Item>
+        </edo:Items>
+        <edo:Totals>
+            <edo:TotalWithoutVat>150000.00</edo:TotalWithoutVat>
+            <edo:TotalVat>30000.00</edo:TotalVat>
+            <edo:TotalWithVat>180000.00</edo:TotalWithVat>
+        </edo:Totals>
+        <edo:Taxes>
+            <edo:TaxEntry itemRef="1">
+                <edo:Rate>20</edo:Rate>
+                <edo:Base>100000.00</edo:Base>
+                <edo:Amount>20000.00</edo:Amount>
+            </edo:TaxEntry>
+            <edo:TaxEntry itemRef="2">
+                <edo:Rate>20</edo:Rate>
+                <edo:Base>50000.00</edo:Base>
+                <edo:Amount>10000.00</edo:Amount>
+            </edo:TaxEntry>
+        </edo:Taxes>
+    </edo:Body>
+
+    <edo:Signatures>
+        <edo:Signature algorithm="GOST R 34.10-2012 256">
+            <edo:SignerInn>7701234567</edo:SignerInn>
+            <edo:CertificateThumbprint>AABBCCDDEEFF00112233445566778899AABBCCDD</edo:CertificateThumbprint>
+            <edo:SignedAt>2024-03-15T14:30:00</edo:SignedAt>
+            <edo:SignatureValue>SGVsbG8gV29ybGQ=</edo:SignatureValue>
+        </edo:Signature>
+    </edo:Signatures>
+
+</edo:ElectronicDocument>
