@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edo:ElectronicDocument
+    xmlns:edo="urn:edo:test:document:v1"
+    id="00000000-0000-0000-0000-000000000001"
+    version="1.0">
+
+    <edo:Header>
+        <edo:DocumentNumber>АКТ-001</edo:DocumentNumber>
+        <edo:DocumentDate>2024-01-10</edo:DocumentDate>
+        <edo:DocumentType>Act</edo:DocumentType>
+        <edo:Currency>RUB</edo:Currency>
+    </edo:Header>
+
+    <edo:Participants>
+        <edo:Participant role="Seller">
+            <edo:Inn>9876543210</edo:Inn>
+            <edo:ForeignEntity>
+                <edo:Name>Acme Corp</edo:Name>
+                <edo:CountryCode>US</edo:CountryCode>
+            </edo:ForeignEntity>
+            <edo:Address>
+                <edo:ForeignAddress>123 Main St, New York, USA</edo:ForeignAddress>
+            </edo:Address>
+        </edo:Participant>
+
+        <edo:Participant role="Buyer">
+            <edo:Inn>1234567890</edo:Inn>
+            <edo:LegalEntity>
+                <edo:FullName>АО «Покупатель»</edo:FullName>
+                <edo:Ogrn>9876543210123</edo:Ogrn>
+            </edo:LegalEntity>
+            <edo:Address>
+                <edo:RussianAddress>
+                    <edo:PostalCode>620000</edo:PostalCode>
+                    <edo:RegionCode>66</edo:RegionCode>
+                    <edo:City>Екатеринбург</edo:City>
+                </edo:RussianAddress>
+            </edo:Address>
+        </edo:Participant>
+    </edo:Participants>
+
+    <edo:Body>
+        <edo:Items>
+            <edo:Item lineNumber="1">
+                <edo:Name>Услуга консалтинга</edo:Name>
+                <edo:UnitCode>642</edo:UnitCode>
+                <edo:Quantity>1.000</edo:Quantity>
+                <edo:Price>10000.00</edo:Price>
+                <edo:Amount>10000.00</edo:Amount>
+                <edo:VatRate>WithoutVat</edo:VatRate>
+            </edo:Item>
+        </edo:Items>
+        <edo:Totals>
+            <edo:TotalWithoutVat>10000.00</edo:TotalWithoutVat>
+            <edo:TotalVat>0.00</edo:TotalVat>
+            <edo:TotalWithVat>10000.00</edo:TotalWithVat>
+        </edo:Totals>
+    </edo:Body>
+
+</edo:ElectronicDocument>

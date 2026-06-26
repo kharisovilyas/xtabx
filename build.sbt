@@ -1,5 +1,7 @@
 val scala3Version = "3.3.4"
 
+addCommandAlias("start", "runMain edo.Main")
+
 lazy val root = project
   .in(file("."))
   .settings(
@@ -11,11 +13,14 @@ lazy val root = project
       "co.fs2"                 %% "fs2-core"             % "3.11.0",
       "org.typelevel"          %% "cats-effect"          % "3.5.4",
       "org.gnieh"              %% "fs2-data-xml"         % "1.11.2",
-      "co.fs2"                 %% "fs2-io"               % "3.11.0" % Test,
+      "co.fs2"                 %% "fs2-io"               % "3.11.0",
       "org.scalameta"          %% "munit"                % "1.0.2"  % Test,
       "org.typelevel"          %% "munit-cats-effect"    % "2.0.0"  % Test
     ),
     testFrameworks += new TestFramework("munit.Framework"),
+    run / fork := true,
+    run / javaOptions += "-Dfile.encoding=UTF-8",
+    run / outputStrategy := Some(StdoutOutput),
 
     Compile / sourceGenerators += Def.task {
       XsdDescriptorGen.generate(
