@@ -23,9 +23,10 @@ lazy val root = project
     run / outputStrategy := Some(StdoutOutput),
 
     Compile / sourceGenerators += Def.task {
-      XsdDescriptorGen.generate(
-        (Compile / sourceManaged).value,
-        baseDirectory.value / "edo_test_schema.xsd"
-      )
+      val schemaDir = baseDirectory.value / "schema"
+      val xsdFiles  = schemaDir.listFiles().toList.filter(_.getName.endsWith(".xsd"))
+      xsdFiles.flatMap { xsd =>
+        XsdDescriptorGen.generate((Compile / sourceManaged).value, xsd)
+      }
     }.taskValue
   )
