@@ -4,7 +4,7 @@ import cats.effect.{IO, IOApp}
 import fs2.Stream
 import fs2.io.file.{Files, Path}
 import scala.xml.XML
-import java.nio.file.Paths
+import java.nio.file.{Paths, Files as NioFiles}
 
 import edo.*
 import edo.derivation.DerivedInstances.given
@@ -33,12 +33,20 @@ object Main extends IOApp.Simple:
       _    <- processFile(args)
     yield ()
 
+  /** Корень проекта — передаётся из build.sbt через -Dxtabx.home. */
+  private val projectHome: java.nio.file.Path =
+    sys.props.get("xtabx.home")
+      .map(Paths.get(_))
+      .getOrElse(Paths.get("."))
+
+  private def resolve(rel: String): java.nio.file.Path = projectHome.resolve(rel)
+
   private def processFile(explicit: Option[String]): IO[Unit] =
     IO(detectInputFile(explicit)).flatMap {
       case None =>
-        IO.println("Использование: sbt start                        (читает data/sample_full.xml)") >>
-        IO.println("               sbt \"start data/invoice.xml\"      (читает указанный файл)")    >>
-        IO.raiseError(new RuntimeException("Файл не найден. Положите XML в папку data/"))
+        IO.println(s"Использование: sbt start                          (читает data/sample_full.xml)") >>
+        IO.println(s"               sbt \"start data/invoice.xml\"        (читает указанный файл)")     >>
+        IO.raiseError(new RuntimeException(s"Файл не найден. Положите XML в $projectHome/data/"))
 
       case Some(path) =>
         IO.println(s"Файл: $path") >> IO.println("") >>
@@ -46,12 +54,19 @@ object Main extends IOApp.Simple:
     }
 
   private def detectInputFile(explicit: Option[String]): Option[String] =
-    val candidates = explicit.toList ++ List(
-      "data/sample_full.xml",
-      "data/sample.xml",
-      "data/invoice.xml"
-    )
-    candidates.find(p => java.nio.file.Files.exists(Paths.get(p)))
+    // явно переданный путь имеет приоритет
+    explicit.map(resolve(_)).filter(NioFiles.exists(_)).map(_.toString).orElse {
+      // дефолтные имена
+      val preferred = List("data/sample_full.xml", "data/sample.xml", "data/invoice.xml")
+      preferred.map(resolve(_)).find(NioFiles.exists(_)).map(_.toString).orElse {
+        // любой первый .xml в data/
+        val dataDir = resolve("data")
+        Option(dataDir.toFile.listFiles())
+          .getOrElse(Array.empty[java.io.File])
+          .find(_.getName.endsWith(".xml"))
+          .map(_.getAbsolutePath)
+      }
+    }
 
   // ── 1. Полный документ ────────────────────────────────────────────────────
 

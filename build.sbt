@@ -19,8 +19,11 @@ lazy val root = project
     ),
     testFrameworks += new TestFramework("munit.Framework"),
     run / fork := true,
-    run / javaOptions += "-Dfile.encoding=UTF-8",
     run / outputStrategy := Some(StdoutOutput),
+    run / javaOptions := Seq(
+      "-Dfile.encoding=UTF-8",
+      s"-Dxtabx.home=${baseDirectory.value.getAbsolutePath}"
+    ),
 
     Compile / sourceGenerators += Def.task {
       val schemaDir = baseDirectory.value / "schema"
